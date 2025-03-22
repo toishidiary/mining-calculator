@@ -1,0 +1,13 @@
+{
+  "name": "Mining Calculator",
+  "description": "PHP калькулятор доходности на базе API WhatToMine",
+  "project": "php",
+  "plugins": [],
+  "services": [
+    {
+      "name": "web",
+      "source": ".",
+      "startCommand": "php -S 0.0.0.0:9000 index.php"
+    }
+  ]
+}
