@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Калькулятор доходности</title>
+</head>
+<body>
+  <h1>Калькулятор доходности</h1>
+  <form id="mining-form">
+    <input type="number" name="hashrate" placeholder="Hashrate (MH/s)" required><br>
+    <input type="number" name="power" placeholder="Power (W)" required><br>
+    <input type="number" name="cost" placeholder="Cost (₽/kWh)" value="4.5" required><br>
+    <select name="algo">
+      <option value="etchash">Etchash</option>
+      <option value="kawpow">Kawpow</option>
+      <option value="ethash">Ethash</option>
+    </select><br><br>
+    <button type="submit">Рассчитать</button>
+  </form>
+
+  <hr>
+  <div id="result"></div>
+
+  <script>
+  document.getElementById('mining-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch('calculator.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      const result = document.getElementById('result');
+      if (data.success) {
+        result.innerHTML = data.results.slice(0, 5).map(item => `
+          <div>
+            <strong>${item.coin}</strong><br>
+            Доход: $${item.profit_per_day}<br>
+            Расход: $${item.electricity_cost}<br>
+            Прибыль: $${item.net_profit}<br>
+            Алгоритм: ${item.tag}
+          </div><hr>
+        `).join('');
+      } else {
+        result.innerHTML = `<p style="color:red">${data.error}</p>`;
+      }
+    });
+  });
+  </script>
+</body>
+</html>
