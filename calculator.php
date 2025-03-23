@@ -27,10 +27,8 @@ if (!isset($data['coins'])) {
 
 $results = [];
 
-// Отладка
-file_put_contents("php://stderr", $coin['algorithm'] . " | " . $coin['tag'] . "\n", FILE_APPEND);
-
 foreach ($data['coins'] as $coinName => $coin) {
+    file_put_contents("php://stderr", $coin['algorithm'] . " | " . $coin['tag'] . "\n", FILE_APPEND);
     if (strtolower($coin['algorithm']) === strtolower($algo) && $coin['tag'] !== 'NICEHASH') {
         if (!isset($coin['btc_price']) || !isset($coin['btc_revenue'])) {
             continue;
