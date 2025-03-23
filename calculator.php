@@ -27,8 +27,10 @@ if (!isset($data['coins'])) {
 
 $results = [];
 
+$targetCoins = ['ETC', 'BTC', 'RVN', 'ERG', 'KAS', 'FLUX']; // можно расширить список
+
 foreach ($data['coins'] as $coinName => $coin) {
-    if (strtolower($coin['algorithm']) === strtolower($algo) && $coin['tag'] !== 'NICEHASH') {
+    if (in_array($coin['tag'], $targetCoins)) {
         if (!isset($coin['btc_price']) || !isset($coin['btc_revenue'])) {
             continue;
         }
