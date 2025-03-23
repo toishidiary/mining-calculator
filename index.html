@@ -21,40 +21,41 @@
   <div id="results"></div>
 
   <script>
-  document.getElementById('mining-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
+    document.getElementById('mining-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
 
-    fetch('calculator.php', {
-      method: 'POST',
-      body: formData
-    })
-    .then(resp => resp.json())
-   .then(data => {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = ''; // очистим
+      fetch('calculator.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = ''; // очистим
 
-    if (data.success && data.results.length > 0) {
-        data.results.forEach(result => {
+        if (data.success && data.results.length > 0) {
+          data.results.forEach(result => {
             const div = document.createElement('div');
             div.innerHTML = `
-                <strong>${result.coin} (${result.tag})</strong><br>
-                Доход в день: ${result.profit_per_day} ₽<br>
-                Электричество: ${result.electricity_cost} ₽<br>
-                Прибыль: <b>${result.net_profit} ₽</b>
-                <hr>
+              <strong>${result.coin} (${result.tag})</strong><br>
+              Доход в день: ${result.profit_per_day} ₽<br>
+              Электричество: ${result.electricity_cost} ₽<br>
+              Прибыль: <b>${result.net_profit} ₽</b>
+              <hr>
             `;
             resultsDiv.appendChild(div);
-        });
-    } else {
-        resultsDiv.textContent = 'Нет подходящих монет.';
-    }
-})
-.catch(error => {
-    document.getElementById('results').textContent = 'Ошибка при расчёте.';
-    console.error(error);
-});
+          });
+        } else {
+          resultsDiv.textContent = 'Нет подходящих монет.';
+        }
+      })
+      .catch(error => {
+        document.getElementById('results').textContent = 'Ошибка при расчёте.';
+        console.error(error);
+      });
+    }); // ← эта скобка была потеряна
   </script>
 </body>
 </html>
