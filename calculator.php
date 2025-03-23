@@ -4,10 +4,10 @@ header('Content-Type: application/json');
 require_once 'get_btc_price.php';
 
 // Validate input
-$hashrate = floatval($_POST['hashrate'] ?? 0);
-$power = floatval($_POST['power'] ?? 0);
-$cost = floatval($_POST['cost'] ?? 0.1);
-$algo = $_POST['algo'] ?? 'etchash';
+$hashrate = floatval($_POST['hashrate'] ?? 0); // User's hash rate
+$power = floatval($_POST['power'] ?? 0); // Power consumption in watts
+$cost = floatval($_POST['cost'] ?? 0.1); // Electricity cost per kWh
+$algo = $_POST['algo'] ?? 'etchash'; // Mining algorithm
 
 if ($hashrate <= 0 || $power <= 0) {
     echo json_encode(['error' => 'Invalid input data']);
@@ -17,7 +17,7 @@ if ($hashrate <= 0 || $power <= 0) {
 // Get BTC price in RUB
 $btcToRub = getBtcPriceRub();
 if (!$btcToRub) {
-    echo json_encode(['error' => 'Failed to fetch BTC price from Binance']);
+    echo json_encode(['error' => 'Failed to fetch BTC price from CoinGecko']);
     exit;
 }
 
@@ -46,7 +46,14 @@ $results = [];
 
 foreach ($data['coins'] as $coinName => $coin) {
     if (strtolower($coin['algorithm']) === strtolower($algo) && isset($coin['btc_revenue'])) {
-        $profitPerDay = $coin['btc_revenue'] * $btcToRub;
+        // Get the reference hash rate from WhatToMine (if available)
+        $referenceHashrate = floatval($coin['hashrate'] ?? 1); // Default to 1 if not provided
+
+        // Scale the coin revenue based on the user's hash rate
+        $scaledRevenue = $coin['btc_revenue'] * ($hashrate / $referenceHashrate);
+
+        // Calculate daily profit and electricity cost
+        $profitPerDay = $scaledRevenue * $btcToRub;
         $electricityCost = ($power / 1000) * 24 * $cost;
         $netProfit = $profitPerDay - $electricityCost;
 
