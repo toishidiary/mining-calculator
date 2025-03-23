@@ -1,61 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
   <title>Калькулятор доходности</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .results {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Калькулятор доходности</h1>
-  <form id="mining-form">
-    <input type="number" name="hashrate" placeholder="Hashrate (MH/s)" required><br>
-    <input type="number" name="power" placeholder="Power (W)" required><br>
-    <input type="number" name="cost" placeholder="Cost (₽/kWh)" value="4.5" required><br>
-    <select name="algo">
-      <option value="etchash">Etchash</option>
-      <option value="kawpow">Kawpow</option>
-      <option value="ethash">Ethash</option>
-    </select><br><br>
-    <button type="submit">Рассчитать</button>
-  </form>
-
-  <hr>
-  <div id="results"></div>
+  <div class="container">
+    <h1>Калькулятор доходности</h1>
+    <form id="mining-form">
+      <input type="number" name="hashrate" placeholder="Hashrate (MH/s)" required>
+      <input type="number" name="power" placeholder="Power (W)" required>
+      <input type="number" name="cost" placeholder="Cost (₽/kWh)" value="4.5" required>
+      <select name="algo">
+        <option value="etchash">Etchash</option>
+        <option value="kawpow">Kawpow</option>
+        <option value="ethash">Ethash</option>
+      </select>
+      <button type="submit">Рассчитать</button>
+    </form>
+    <div id="results" class="results"></div>
+  </div>
 
   <script>
-    document.getElementById('mining-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
+  document.getElementById('mining-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
 
-      fetch('calculator.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(resp => resp.json())
-      .then(data => {
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = ''; // очистим
+    fetch('calculator.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
 
-        if (data.success && data.results.length > 0) {
-          data.results.forEach(result => {
-            const div = document.createElement('div');
-            div.innerHTML = `
-              <strong>${result.coin} (${result.tag})</strong><br>
-              Доход в день: ${result.profit_per_day} ₽<br>
-              Электричество: ${result.electricity_cost} ₽<br>
-              Прибыль: <b>${result.net_profit} ₽</b>
-              <hr>
-            `;
-            resultsDiv.appendChild(div);
-          });
-        } else {
-          resultsDiv.textContent = 'Нет подходящих монет.';
-        }
-      })
-      .catch(error => {
-        document.getElementById('results').textContent = 'Ошибка при расчёте.';
-        console.error(error);
-      });
-    }); // ← эта скобка была потеряна
+      if (data.success && data.results.length > 0) {
+        data.results.forEach(result => {
+          const div = document.createElement('div');
+          div.innerHTML = `
+            <strong>${result.coin} (${result.tag})</strong><br>
+            Доход в день: ${result.profit_per_day} ₽<br>
+            Электричество: ${result.electricity_cost} ₽<br>
+            Прибыль: <b>${result.net_profit} ₽</b>
+            <hr>
+          `;
+          resultsDiv.appendChild(div);
+        });
+      } else {
+        resultsDiv.textContent = 'Нет подходящих монет.';
+      }
+    })
+    .catch(error => {
+      document.getElementById('results').textContent = 'Ошибка при расчёте.';
+      console.error(error);
+    });
+  });
   </script>
 </body>
 </html>

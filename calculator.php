@@ -1,9 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
-$hashrate = floatval($_POST['hashrate'] ?? 0); // MH/s
-$power = floatval($_POST['power'] ?? 0); // Вт
-$cost = floatval($_POST['cost'] ?? 0.1); // ₽/кВт⋅ч
+$hashrate = floatval($_POST['hashrate'] ?? 0);
+$power = floatval($_POST['power'] ?? 0);
+$cost = floatval($_POST['cost'] ?? 0.1);
 $algo = $_POST['algo'] ?? 'etchash';
 
 if ($hashrate <= 0 || $power <= 0) {
@@ -28,7 +28,6 @@ if (!isset($data['coins'])) {
 $results = [];
 
 foreach ($data['coins'] as $coinName => $coin) {
-    file_put_contents("php://stderr", $coin['algorithm'] . " | " . $coin['tag'] . "\n", FILE_APPEND);
     if (strtolower($coin['algorithm']) === strtolower($algo) && $coin['tag'] !== 'NICEHASH') {
         if (!isset($coin['btc_price']) || !isset($coin['btc_revenue'])) {
             continue;
