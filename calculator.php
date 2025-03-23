@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+require_once 'get_btc_price.php';
 
 $hashrate = floatval($_POST['hashrate'] ?? 0);
 $power = floatval($_POST['power'] ?? 0);
@@ -8,6 +9,12 @@ $algo = $_POST['algo'] ?? 'etchash';
 
 if ($hashrate <= 0 || $power <= 0) {
     echo json_encode(['error' => 'Неверные входные данные']);
+    exit;
+}
+
+$btcToRub = getBtcPriceRub();
+if (!$btcToRub) {
+    echo json_encode(['error' => 'Не удалось получить курс BTC с Binance']);
     exit;
 }
 
@@ -28,12 +35,8 @@ if (!isset($data['coins'])) {
 $results = [];
 
 foreach ($data['coins'] as $coinName => $coin) {
-    if (strtolower($coin['algorithm']) === strtolower($algo) && $coin['tag'] !== 'NICEHASH') {
-        if (!isset($coin['btc_price']) || !isset($coin['btc_revenue'])) {
-            continue;
-        }
-
-        $profitPerDay = $coin['btc_revenue'] * $coin['btc_price'];
+    if (strtolower($coin['algorithm']) === strtolower($algo) && isset($coin['btc_revenue'])) {
+        $profitPerDay = $coin['btc_revenue'] * $btcToRub;
         $electricityCost = ($power / 1000) * 24 * $cost;
         $netProfit = $profitPerDay - $electricityCost;
 
