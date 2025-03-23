@@ -28,7 +28,7 @@ if (!isset($data['coins'])) {
 $results = [];
 
 foreach ($data['coins'] as $coinName => $coin) {
-    if ($coin['algorithm'] === $algo && $coin['tag'] !== 'NICEHASH') {
+    if (strtolower($coin['algorithm']) === strtolower($algo) && $coin['tag'] !== 'NICEHASH') {
         $profitPerDay = $coin['btc_revenue'] * $coin['btc_price'];
         $electricityCost = ($power / 1000) * 24 * $cost;
         $netProfit = $profitPerDay - $electricityCost;
