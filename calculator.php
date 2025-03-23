@@ -1,37 +1,47 @@
 <?php
 header('Content-Type: application/json');
+
 require_once 'get_btc_price.php';
 
+// Validate input
 $hashrate = floatval($_POST['hashrate'] ?? 0);
 $power = floatval($_POST['power'] ?? 0);
 $cost = floatval($_POST['cost'] ?? 0.1);
 $algo = $_POST['algo'] ?? 'etchash';
 
 if ($hashrate <= 0 || $power <= 0) {
-    echo json_encode(['error' => 'Неверные входные данные']);
+    echo json_encode(['error' => 'Invalid input data']);
     exit;
 }
 
+// Get BTC price in RUB
 $btcToRub = getBtcPriceRub();
 if (!$btcToRub) {
-    echo json_encode(['error' => 'Не удалось получить курс BTC с Binance']);
+    echo json_encode(['error' => 'Failed to fetch BTC price from Binance']);
     exit;
 }
 
+// Fetch data from WhatToMine API
 $apiUrl = "https://whattomine.com/coins.json";
-$response = file_get_contents($apiUrl);
+$context = stream_context_create([
+    'http' => [
+        'timeout' => 10 // Set a timeout for the request
+    ]
+]);
+$response = file_get_contents($apiUrl, false, $context);
 
 if (!$response) {
-    echo json_encode(['error' => 'Ошибка обращения к API WhatToMine']);
+    echo json_encode(['error' => 'Failed to fetch data from WhatToMine API']);
     exit;
 }
 
 $data = json_decode($response, true);
 if (!isset($data['coins'])) {
-    echo json_encode(['error' => 'Неверный ответ от API']);
+    echo json_encode(['error' => 'Invalid response from WhatToMine API']);
     exit;
 }
 
+// Calculate profitability for each coin
 $results = [];
 
 foreach ($data['coins'] as $coinName => $coin) {
@@ -50,6 +60,7 @@ foreach ($data['coins'] as $coinName => $coin) {
     }
 }
 
+// Sort results by net profit in descending order
 usort($results, fn($a, $b) => $b['net_profit'] <=> $a['net_profit']);
 
 echo json_encode([
